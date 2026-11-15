@@ -1,0 +1,173 @@
+import AppKit
+import SwiftUI
+
+@main
+@MainActor
+final class GlassSelectApp: NSObject, NSApplicationDelegate {
+    private let monitor = SelectionMonitor()
+    private let panelController = FloatingPanelController()
+    private var statusItem: NSStatusItem?
+    private var settingsWindow: NSWindow?
+    private var toggleMenuItem: NSMenuItem?
+    private var permissionMenuItem: NSMenuItem?
+
+    static func main() {
+        let app = NSApplication.shared
+        let delegate = GlassSelectApp()
+        app.delegate = delegate
+        app.setActivationPolicy(.accessory)
+        app.run()
+    }
+
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        setupStatusItem()
+
+        let autoShow = UserDefaults.standard.object(forKey: "autoShowEnabled") as? Bool ?? true
+        monitor.setEnabled(autoShow)
+
+        monitor.onSelectionDetected = { [weak self] event in
+            self?.panelController.show(for: event)
+        }
+        monitor.onDismissRequested = { [weak self] in
+            self?.panelController.dismiss()
+        }
+        monitor.start()
+
+        if !monitor.isAccessibilityGranted {
+            openSettings()
+        }
+    }
+
+    func applicationWillTerminate(_ notification: Notification) {
+        monitor.stop()
+    }
+
+    private func setupStatusItem() {
+        let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
+        if let button = item.button {
+            button.image = NSImage(systemSymbolName: "character.cursor.ibeam", accessibilityDescription: "GlassSelect")
+        }
+
+        let menu = NSMenu()
+
+        let autoShow = UserDefaults.standard.object(forKey: "autoShowEnabled") as? Bool ?? true
+        let toggleItem = NSMenuItem(
+            title: "Auto-Show on Text Selection",
+            action: #selector(toggleAutoShow),
+            keyEquivalent: ""
+        )
+        toggleItem.target = self
+        toggleItem.state = autoShow ? .on : .off
+        menu.addItem(toggleItem)
+        self.toggleMenuItem = toggleItem
+
+        let triggerItem = NSMenuItem(
+            title: "Show Bar for Selection / Clipboard",
+            action: #selector(triggerManual),
+            keyEquivalent: ""
+        )
+        triggerItem.target = self
+        menu.addItem(triggerItem)
+
+        let previewItem = NSMenuItem(
+            title: "Preview Floating Bar",
+            action: #selector(previewBar),
+            keyEquivalent: ""
+        )
+        previewItem.target = self
+        menu.addItem(previewItem)
+
+        menu.addItem(.separator())
+
+        let permItem = NSMenuItem(
+            title: permissionTitle(),
+            action: #selector(handlePermissionClick),
+            keyEquivalent: ""
+        )
+        permItem.target = self
+        menu.addItem(permItem)
+        self.permissionMenuItem = permItem
+
+        let settingsItem = NSMenuItem(
+            title: "Settings...",
+            action: #selector(openSettings),
+            keyEquivalent: ","
+        )
+        settingsItem.target = self
+        menu.addItem(settingsItem)
+
+        menu.addItem(.separator())
+
+        let quitItem = NSMenuItem(
+            title: "Quit GlassSelect",
+            action: #selector(quitApp),
+            keyEquivalent: "q"
+        )
+        quitItem.target = self
+        menu.addItem(quitItem)
+
+        item.menu = menu
+        self.statusItem = item
+    }
+
+    private func permissionTitle() -> String {
+        monitor.refreshAccessibilityStatus()
+        return monitor.isAccessibilityGranted
+            ? "Accessibility: Granted"
+            : "Grant Accessibility Permission..."
+    }
+
+    @objc private func toggleAutoShow() {
+        let current = UserDefaults.standard.object(forKey: "autoShowEnabled") as? Bool ?? true
+        let next = !current
+        UserDefaults.standard.set(next, forKey: "autoShowEnabled")
+        monitor.setEnabled(next)
+        toggleMenuItem?.state = next ? .on : .off
+    }
+
+    @objc private func triggerManual() {
+        monitor.triggerManualSelectionAtCursor()
+    }
+
+    @objc private func previewBar() {
+        let mouse = NSEvent.mouseLocation
+        let sample = TextSelectionEvent(
+            text: "마찬가지로",
+            anchorPoint: mouse,
+            selectionRect: nil,
+            frontmostBundleID: nil
+        )
+        panelController.show(for: sample)
+    }
+
+    @objc private func handlePermissionClick() {
+        monitor.refreshAccessibilityStatus()
+        if !monitor.isAccessibilityGranted {
+            monitor.requestAccessibilityPermission()
+        } else {
+            openSettings()
+        }
+        permissionMenuItem?.title = permissionTitle()
+    }
+
+    @objc private func openSettings() {
+        if settingsWindow == nil {
+            let view = SettingsView(monitor: monitor) { [weak self] in
+                self?.previewBar()
+            }
+            let hosting = NSHostingController(rootView: view)
+            let window = NSWindow(contentViewController: hosting)
+            window.title = "GlassSelect Settings"
+            window.styleMask = [.titled, .closable, .miniaturizable]
+            window.center()
+            window.isReleasedWhenClosed = false
+            self.settingsWindow = window
+        }
+        NSApp.activate(ignoringOtherApps: true)
+        settingsWindow?.makeKeyAndOrderFront(nil)
+    }
+
+    @objc private func quitApp() {
+        NSApp.terminate(nil)
+    }
+}

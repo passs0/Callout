@@ -1,0 +1,102 @@
+import AppKit
+import SwiftUI
+
+struct SettingsView: View {
+    @ObservedObject var monitor: SelectionMonitor
+    @AppStorage("autoShowEnabled") private var autoShowEnabled: Bool = true
+    @AppStorage("searchEngine") private var searchEngineRaw: String = SearchEngine.google.rawValue
+    @AppStorage("translateTargetLang") private var translateTargetLang: String = "en"
+
+    var onTestPreview: () -> Void
+
+    private let languages: [(code: String, name: String)] = [
+        ("en", "English"),
+        ("zh-Hant", "Chinese (Traditional)"),
+        ("zh-Hans", "Chinese (Simplified)"),
+        ("ja", "Japanese"),
+        ("ko", "Korean"),
+        ("es", "Spanish"),
+        ("fr", "French"),
+        ("de", "German")
+    ]
+
+    var body: some View {
+        Form {
+            Section("Permissions") {
+                HStack {
+                    Image(systemName: monitor.isAccessibilityGranted ? "checkmark.shield.fill" : "exclamationmark.triangle.fill")
+                        .foregroundStyle(monitor.isAccessibilityGranted ? .green : .orange)
+                        .font(.title3)
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Accessibility Access")
+                            .font(.headline)
+                        Text(monitor.isAccessibilityGranted
+                             ? "Granted — text selection works across apps."
+                             : "Required to read selected text automatically.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    Spacer()
+
+                    if !monitor.isAccessibilityGranted {
+                        Button("Grant Access") {
+                            monitor.requestAccessibilityPermission()
+                        }
+                        .buttonStyle(.borderedProminent)
+                    } else {
+                        Button("Refresh") {
+                            monitor.refreshAccessibilityStatus()
+                        }
+                    }
+                }
+            }
+
+            Section("Behavior") {
+                Toggle("Show automatically when selecting text", isOn: $autoShowEnabled)
+                    .onChange(of: autoShowEnabled) { _, newValue in
+                        monitor.setEnabled(newValue)
+                    }
+
+                Picker("Search Engine", selection: $searchEngineRaw) {
+                    ForEach(SearchEngine.allCases) { engine in
+                        Text(engine.rawValue).tag(engine.rawValue)
+                    }
+                }
+
+                Picker("Translate To", selection: $translateTargetLang) {
+                    ForEach(languages, id: \.code) { lang in
+                        Text(lang.name).tag(lang.code)
+                    }
+                }
+            }
+
+            Section("Shortcuts & Preview") {
+                LabeledContent("Trigger on Selection / Clipboard") {
+                    Text("⌥ Space  or  ⌘⇧E")
+                        .font(.system(.body, design: .monospaced))
+                        .foregroundStyle(.secondary)
+                }
+                LabeledContent("Dismiss Menu") {
+                    Text("Esc  or  Click Outside")
+                        .font(.system(.body, design: .monospaced))
+                        .foregroundStyle(.secondary)
+                }
+
+                HStack {
+                    Spacer()
+                    Button("Preview Floating Bar") {
+                        onTestPreview()
+                    }
+                    .buttonStyle(.bordered)
+                }
+            }
+        }
+        .formStyle(.grouped)
+        .frame(width: 440, height: 380)
+        .onAppear {
+            monitor.refreshAccessibilityStatus()
+        }
+    }
+}
