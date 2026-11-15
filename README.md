@@ -14,6 +14,10 @@
   <img src="https://img.shields.io/badge/framework-SwiftUI%20%7C%20AppKit%20%7C%20Translation-blue" alt="Frameworks" />
 </p>
 
+<p align="center">
+  <img src="assets/preview.png" width="329" alt="GlassSelect Liquid Glass Action Pill" />
+</p>
+
 ---
 
 > [!NOTE]
