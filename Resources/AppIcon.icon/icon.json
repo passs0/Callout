@@ -6,7 +6,14 @@
         {
           "glass" : false,
           "image-name" : "4.3 – layer.svg",
-          "name" : "4.3 – layer"
+          "name" : "4.3 – layer",
+          "position" : {
+            "scale" : 0.8,
+            "translation-in-points" : [
+              44.13540034999994,
+              -0.10656122999989748
+            ]
+          }
         },
         {
           "blend-mode-specializations" : [
@@ -15,11 +22,17 @@
               "value" : "plus-darker"
             }
           ],
+          "fill" : {
+            "solid" : "extended-srgb:0.00000,0.53333,1.00000,1.00000"
+          },
           "glass" : false,
           "image-name" : "3.2 – layer.svg",
           "name" : "3.2 – layer"
         },
         {
+          "fill" : {
+            "solid" : "extended-gray:0.25000,1.00000"
+          },
           "image-name" : "2.1 – layer.svg",
           "name" : "2.1 – layer"
         }
