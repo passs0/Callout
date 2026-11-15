@@ -14,7 +14,6 @@ final class PopoverState: ObservableObject {
     @Published var selectedText: String = ""
     @Published var frontmostBundleID: String?
     @Published var mode: PopoverDisplayMode = .compactPill
-    @Published var toastMessage: String?
 
     var onRequestResize: (() -> Void)?
     var onDismiss: (() -> Void)?
@@ -24,18 +23,6 @@ final class PopoverState: ObservableObject {
         selectedText = text
         frontmostBundleID = bundleID
         mode = .compactPill
-        toastMessage = nil
-    }
-
-    func showToast(_ message: String, autoDismiss: Bool = true) {
-        withAnimation(.spring(response: 0.25, dampingFraction: 0.85)) {
-            toastMessage = message
-        }
-        if autoDismiss {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.85) { [weak self] in
-                self?.onDismiss?()
-            }
-        }
     }
 }
 
@@ -64,27 +51,16 @@ struct ActionMenuView: View {
 
     var body: some View {
         GlassEffectContainer(spacing: 12) {
-            ZStack {
-                Group {
-                    switch state.mode {
-                    case .compactPill:
-                        compactPillView
-                    case .expandedMenu:
-                        expandedMenuView
-                    case .lookUpResult(let definition):
-                        lookUpResultView(definition: definition)
-                    case .translateResult(let translated, let sourceLang, let isLoading):
-                        translateResultView(translated: translated, sourceLang: sourceLang, isLoading: isLoading)
-                    }
-                }
-
-                if let toast = state.toastMessage {
-                    Text(toast)
-                        .font(.system(size: 12, weight: .semibold))
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 7)
-                        .glassEffect(.regular, in: .capsule)
-                        .transition(.scale(scale: 0.9).combined(with: .opacity))
+            Group {
+                switch state.mode {
+                case .compactPill:
+                    compactPillView
+                case .expandedMenu:
+                    expandedMenuView
+                case .lookUpResult(let definition):
+                    lookUpResultView(definition: definition)
+                case .translateResult(let translated, let sourceLang, let isLoading):
+                    translateResultView(translated: translated, sourceLang: sourceLang, isLoading: isLoading)
                 }
             }
         }
@@ -129,7 +105,7 @@ struct ActionMenuView: View {
         HStack(spacing: 2) {
             pillButton("Copy") {
                 TextActionRunner.copy(state.selectedText)
-                state.showToast("Copied")
+                state.onDismiss?()
             }
 
             pillButton("Look Up") {
@@ -193,7 +169,7 @@ struct ActionMenuView: View {
         VStack(spacing: 0) {
             Button {
                 TextActionRunner.copy(state.selectedText)
-                state.showToast("Copied")
+                state.onDismiss?()
             } label: {
                 VStack(spacing: 4) {
                     Image(systemName: "doc.on.doc")
@@ -259,11 +235,11 @@ struct ActionMenuView: View {
 
             VStack(spacing: 1) {
                 menuRow(icon: "text.quote", title: "Copy Link with Highlight") {
-                    let hadURL = TextActionRunner.copyLinkWithHighlight(
+                    _ = TextActionRunner.copyLinkWithHighlight(
                         state.selectedText,
                         frontmostBundleID: state.frontmostBundleID
                     )
-                    state.showToast(hadURL ? "Highlight Link Copied" : "Quote Copied")
+                    state.onDismiss?()
                 }
                 menuRow(icon: "square.and.arrow.up", title: "Share...") {
                     state.onShareRequested?(state.selectedText)
@@ -401,7 +377,7 @@ struct ActionMenuView: View {
                 if let translated {
                     Button {
                         TextActionRunner.copy(translated)
-                        state.showToast("Copied")
+                        state.onDismiss?()
                     } label: {
                         Image(systemName: "doc.on.doc")
                             .font(.system(size: 12))
