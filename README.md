@@ -19,7 +19,7 @@
 <p align="center">
   <img src="assets/preview_pill.png" width="380" alt="Callout Compact Liquid Glass Pill" />
   <br/><br/>
-  <img src="assets/preview_menu.jpg" width="320" alt="Callout Expanded Context Menu" />
+  <img src="assets/preview_menu.png" width="380" alt="Callout Expanded Context Menu" />
 </p>
 
 ---
