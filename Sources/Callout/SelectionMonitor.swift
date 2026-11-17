@@ -22,6 +22,7 @@ final class SelectionMonitor: ObservableObject {
     private var permissionTimer: Timer?
 
     private var mouseDownLocation: NSPoint?
+    private var mouseDownDragChangeCount: Int = 0
     private var isEnabled: Bool = true
     private var pendingWorkItem: DispatchWorkItem?
     private var isReadingSelection = false
@@ -44,9 +45,11 @@ final class SelectionMonitor: ObservableObject {
 
         mouseDownMonitor = NSEvent.addGlobalMonitorForEvents(matching: .leftMouseDown) { [weak self] _ in
             let loc = NSEvent.mouseLocation
+            let dragCount = NSPasteboard(name: .drag).changeCount
             Task { @MainActor [weak self] in
                 guard let self else { return }
                 self.mouseDownLocation = loc
+                self.mouseDownDragChangeCount = dragCount
                 if !self.isClickInsideOurWindows(loc) {
                     self.onDismissRequested?()
                 }
@@ -57,9 +60,12 @@ final class SelectionMonitor: ObservableObject {
             let clickCount = event.clickCount
             let upLocation = NSEvent.mouseLocation
             let modifiers = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
+            let dragCount = NSPasteboard(name: .drag).changeCount
             Task { @MainActor [weak self] in
                 guard let self, self.isEnabled else { return }
                 if self.isClickInsideOurWindows(upLocation) { return }
+                // Ignore drag-and-drop operations (files, images, links, etc.)
+                if dragCount != self.mouseDownDragChangeCount { return }
                 // Ignore if user is holding Cmd/Ctrl/Opt while clicking (e.g. Cmd+click link)
                 if !modifiers.isDisjoint(with: [.command, .control, .option]) { return }
 
