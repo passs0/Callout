@@ -2,17 +2,17 @@
 import PackageDescription
 
 let package = Package(
-    name: "GlassSelect",
+    name: "Callout",
     platforms: [
         .macOS(.v26)
     ],
     products: [
-        .executable(name: "GlassSelect", targets: ["GlassSelect"])
+        .executable(name: "Callout", targets: ["Callout"])
     ],
     targets: [
         .executableTarget(
-            name: "GlassSelect",
-            path: "Sources/GlassSelect",
+            name: "Callout",
+            path: "Sources/Callout",
             linkerSettings: [
                 .linkedFramework("AppKit"),
                 .linkedFramework("SwiftUI"),

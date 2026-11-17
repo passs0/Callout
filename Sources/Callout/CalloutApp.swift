@@ -3,7 +3,7 @@ import SwiftUI
 
 @main
 @MainActor
-final class GlassSelectApp: NSObject, NSApplicationDelegate {
+final class CalloutApp: NSObject, NSApplicationDelegate {
     private let monitor = SelectionMonitor()
     private let panelController = FloatingPanelController()
     private var statusItem: NSStatusItem?
@@ -13,7 +13,7 @@ final class GlassSelectApp: NSObject, NSApplicationDelegate {
 
     static func main() {
         let app = NSApplication.shared
-        let delegate = GlassSelectApp()
+        let delegate = CalloutApp()
         app.delegate = delegate
         app.setActivationPolicy(.accessory)
         app.run()
@@ -45,7 +45,7 @@ final class GlassSelectApp: NSObject, NSApplicationDelegate {
     private func setupStatusItem() {
         let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         if let button = item.button {
-            button.image = NSImage(systemSymbolName: "character.cursor.ibeam", accessibilityDescription: "GlassSelect")
+            button.image = NSImage(systemSymbolName: "character.cursor.ibeam", accessibilityDescription: "Callout")
         }
 
         let menu = NSMenu()
@@ -107,7 +107,7 @@ final class GlassSelectApp: NSObject, NSApplicationDelegate {
         menu.addItem(.separator())
 
         let quitItem = NSMenuItem(
-            title: "Quit GlassSelect",
+            title: "Quit Callout",
             action: #selector(quitApp),
             keyEquivalent: "q"
         )
@@ -166,7 +166,7 @@ final class GlassSelectApp: NSObject, NSApplicationDelegate {
             }
             let hosting = NSHostingController(rootView: view)
             let window = NSWindow(contentViewController: hosting)
-            window.title = "GlassSelect Settings"
+            window.title = "Callout Settings"
             window.styleMask = [.titled, .closable, .miniaturizable]
             window.center()
             window.isReleasedWhenClosed = false

@@ -1,4 +1,4 @@
-name: Build & Release GlassSelect
+name: Build & Release Callout
 
 on:
   push:
@@ -26,14 +26,14 @@ jobs:
           xcode-select -p
           xcodebuild -version
 
-      - name: Build GlassSelect.app and DMG (with dynamic Assets.car)
+      - name: Build Callout.app and DMG (with dynamic Assets.car)
         run: ./scripts/build_dmg.sh
 
       - name: Upload DMG artifact
         uses: actions/upload-artifact@v4
         with:
-          name: GlassSelect-DMG
-          path: build/GlassSelect-*.dmg
+          name: Callout-DMG
+          path: build/Callout-*.dmg
 
       - name: Publish to GitHub Release
         if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
@@ -45,7 +45,7 @@ jobs:
             TAG="v1.0.0"
           fi
           if gh release view "$TAG" >/dev/null 2>&1; then
-            gh release upload "$TAG" build/GlassSelect-*.dmg --clobber
+            gh release upload "$TAG" build/Callout-*.dmg --clobber
           else
-            gh release create "$TAG" build/GlassSelect-*.dmg --title "GlassSelect $TAG" --notes "Built on GitHub Actions with dynamic macOS 26 Liquid Glass icon (Assets.car)."
+            gh release create "$TAG" build/Callout-*.dmg --title "Callout $TAG" --notes "Built on GitHub Actions with dynamic macOS 26 Liquid Glass icon (Assets.car)."
           fi

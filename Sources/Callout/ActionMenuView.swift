@@ -249,7 +249,7 @@ struct ActionMenuView: View {
                     state.onDismiss?()
                     TextActionRunner.newQuickNote(text)
                 }
-                menuRow(icon: "circle.circle", title: "Ask Siri") {
+                menuRow(icon: "siri", title: "Ask Siri") {
                     let text = state.selectedText
                     state.onDismiss?()
                     TextActionRunner.askSiri(text)

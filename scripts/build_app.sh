@@ -4,11 +4,11 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT_DIR"
 
-echo "Building GlassSelect (release)..."
+echo "Building Callout (release)..."
 swift build -c release
 
-BIN_PATH="$(swift build -c release --show-bin-path)/GlassSelect"
-APP_DIR="$ROOT_DIR/build/GlassSelect.app"
+BIN_PATH="$(swift build -c release --show-bin-path)/Callout"
+APP_DIR="$ROOT_DIR/build/Callout.app"
 CONTENTS_DIR="$APP_DIR/Contents"
 MACOS_DIR="$CONTENTS_DIR/MacOS"
 RESOURCES_DIR="$CONTENTS_DIR/Resources"
@@ -16,8 +16,8 @@ RESOURCES_DIR="$CONTENTS_DIR/Resources"
 rm -rf "$APP_DIR"
 mkdir -p "$MACOS_DIR" "$RESOURCES_DIR"
 
-cp "$BIN_PATH" "$MACOS_DIR/GlassSelect"
-chmod +x "$MACOS_DIR/GlassSelect"
+cp "$BIN_PATH" "$MACOS_DIR/Callout"
+chmod +x "$MACOS_DIR/Callout"
 
 ICON_SRC="$ROOT_DIR/Resources/AppIcon.icon"
 ICTOOL="/Applications/Icon Composer.app/Contents/Executables/ictool"
@@ -59,17 +59,17 @@ cat > "$CONTENTS_DIR/Info.plist" << 'EOF'
     <key>CFBundleDevelopmentRegion</key>
     <string>en</string>
     <key>CFBundleExecutable</key>
-    <string>GlassSelect</string>
+    <string>Callout</string>
     <key>CFBundleIconFile</key>
     <string>AppIcon</string>
     <key>CFBundleIconName</key>
     <string>AppIcon</string>
     <key>CFBundleIdentifier</key>
-    <string>com.glassselect.app</string>
+    <string>com.callout.app</string>
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
     <key>CFBundleName</key>
-    <string>GlassSelect</string>
+    <string>Callout</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>
@@ -81,7 +81,7 @@ cat > "$CONTENTS_DIR/Info.plist" << 'EOF'
     <key>LSUIElement</key>
     <true/>
     <key>NSAppleEventsUsageDescription</key>
-    <string>GlassSelect uses Apple Events to get the active browser URL for Copy Link with Highlight and to create Quick Notes in Apple Notes.</string>
+    <string>Callout uses Apple Events to get the active browser URL for Copy Link with Highlight and to add Quick Notes in Apple Notes.</string>
     <key>NSHighResolutionCapable</key>
     <true/>
 </dict>
