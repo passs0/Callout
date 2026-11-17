@@ -169,8 +169,8 @@ final class SelectionMonitor: ObservableObject {
             return
         }
 
-        // 2. Fallback: simulate Cmd+C and restore pasteboard (works in Chrome, Electron, Safari, Terminal, PDFs)
-        if isAccessibilityGranted {
+        // 2. Fallback: simulate Cmd+C and restore pasteboard (only if Copy is actually enabled in frontmost app!)
+        if isAccessibilityGranted && isCopyEnabled(for: frontApp) {
             isReadingSelection = true
             readSelectionViaCopyFallback(frontApp: frontApp, mouseLocation: mouseLocation) { [weak self] copiedEvent in
                 guard let self else { return }
@@ -289,6 +289,64 @@ final class SelectionMonitor: ObservableObject {
         guard let primaryHeight = NSScreen.screens.first?.frame.height else { return nil }
         let appKitY = primaryHeight - axRect.origin.y - axRect.size.height
         return NSRect(x: axRect.origin.x, y: appKitY, width: axRect.size.width, height: axRect.size.height)
+    }
+
+    private func isCopyEnabled(for frontApp: NSRunningApplication) -> Bool {
+        // Never send Cmd+C fallback in Finder (avoids copying files or beeping on file drag-and-drop)
+        if frontApp.bundleIdentifier == "com.apple.finder" {
+            return false
+        }
+
+        let appElement = AXUIElementCreateApplication(frontApp.processIdentifier)
+        var menuBarRef: CFTypeRef?
+        guard AXUIElementCopyAttributeValue(appElement, kAXMenuBarAttribute as CFString, &menuBarRef) == .success,
+              let menuBar = menuBarRef else {
+            return false
+        }
+
+        var topItemsRef: CFTypeRef?
+        guard AXUIElementCopyAttributeValue(menuBar as! AXUIElement, kAXChildrenAttribute as CFString, &topItemsRef) == .success,
+              let topItems = topItemsRef as? [AXUIElement] else {
+            return false
+        }
+
+        for topItem in topItems {
+            var subMenusRef: CFTypeRef?
+            guard AXUIElementCopyAttributeValue(topItem, kAXChildrenAttribute as CFString, &subMenusRef) == .success,
+                  let subMenus = subMenusRef as? [AXUIElement] else {
+                continue
+            }
+            for subMenu in subMenus {
+                var itemsRef: CFTypeRef?
+                guard AXUIElementCopyAttributeValue(subMenu, kAXChildrenAttribute as CFString, &itemsRef) == .success,
+                      let items = itemsRef as? [AXUIElement] else {
+                    continue
+                }
+                for item in items {
+                    var cmdCharRef: CFTypeRef?
+                    if AXUIElementCopyAttributeValue(item, kAXMenuItemCmdCharAttribute as CFString, &cmdCharRef) == .success,
+                       let cmdChar = cmdCharRef as? String,
+                       cmdChar.uppercased() == "C" {
+                        var modifiersRef: CFTypeRef?
+                        let hasOnlyCmd: Bool
+                        if AXUIElementCopyAttributeValue(item, kAXMenuItemCmdModifiersAttribute as CFString, &modifiersRef) == .success,
+                           let mod = modifiersRef as? Int {
+                            hasOnlyCmd = (mod == 0) // 0 = Command only in AXMenuItemCmdModifiers
+                        } else {
+                            hasOnlyCmd = true
+                        }
+                        if hasOnlyCmd {
+                            var enabledRef: CFTypeRef?
+                            if AXUIElementCopyAttributeValue(item, kAXEnabledAttribute as CFString, &enabledRef) == .success,
+                               let enabled = enabledRef as? Bool {
+                                return enabled
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return false
     }
 
     private func readSelectionViaCopyFallback(

@@ -241,6 +241,12 @@ enum TextActionRunner {
         }
     }
 
+    static func askSiri(_ text: String) {
+        copy(text)
+        let siriURL = URL(fileURLWithPath: "/System/Applications/Siri.app")
+        NSWorkspace.shared.openApplication(at: siriURL, configuration: NSWorkspace.OpenConfiguration())
+    }
+
     private static func activeBrowserURL(bundleID: String?) -> String? {
         guard let bundleID else { return nil }
         let scriptSource: String?

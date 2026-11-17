@@ -57,6 +57,8 @@ final class FloatingPanelController {
         let contentView = ActionMenuView(state: state)
         let hosting = NSHostingView(rootView: contentView)
         hosting.translatesAutoresizingMaskIntoConstraints = false
+        hosting.wantsLayer = true
+        hosting.layer?.backgroundColor = NSColor.clear.cgColor
 
         let panel = NonActivatingPanel(
             contentRect: NSRect(x: 0, y: 0, width: 320, height: 60),
@@ -87,15 +89,15 @@ final class FloatingPanelController {
         let visibleFrame = screen?.visibleFrame ?? NSRect(x: 0, y: 0, width: 1440, height: 900)
 
         var originX = lastAnchor.x - size.width / 2
-        // Place below the selection/cursor by default; flip above if too close to bottom
-        var originY = lastAnchor.y - size.height - 10
-        if originY < visibleFrame.minY + 8 {
-            originY = lastAnchor.y + 18
+        // Account for 32pt transparent shadow padding around the glass surface
+        var originY = lastAnchor.y - size.height + 24
+        if originY < visibleFrame.minY - 16 {
+            originY = lastAnchor.y - 12
         }
 
         // Clamp horizontally & vertically to screen visibleFrame
-        originX = max(visibleFrame.minX + 8, min(originX, visibleFrame.maxX - size.width - 8))
-        originY = max(visibleFrame.minY + 8, min(originY, visibleFrame.maxY - size.height - 8))
+        originX = max(visibleFrame.minX - 24, min(originX, visibleFrame.maxX - size.width + 24))
+        originY = max(visibleFrame.minY - 24, min(originY, visibleFrame.maxY - size.height + 24))
 
         let newFrame = NSRect(x: originX, y: originY, width: size.width, height: size.height)
         if initialShow {

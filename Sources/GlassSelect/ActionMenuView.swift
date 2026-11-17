@@ -64,7 +64,7 @@ struct ActionMenuView: View {
                 }
             }
         }
-        .padding(12)
+        .padding(32)
         .fixedSize()
         .environment(\.controlActiveState, .active)
         .translationTask(translationConfig) { @Sendable session in
@@ -244,10 +244,15 @@ struct ActionMenuView: View {
                 menuRow(icon: "square.and.arrow.up", title: "Share...") {
                     state.onShareRequested?(state.selectedText)
                 }
-                menuRow(icon: "note.text.badge.plus", title: "New Quick Note") {
+                menuRow(icon: "note.text.badge.plus", title: "Add to Quick Note") {
                     let text = state.selectedText
                     state.onDismiss?()
                     TextActionRunner.newQuickNote(text)
+                }
+                menuRow(icon: "circle.circle", title: "Ask Siri") {
+                    let text = state.selectedText
+                    state.onDismiss?()
+                    TextActionRunner.askSiri(text)
                 }
             }
             .padding(.top, 4)
