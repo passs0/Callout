@@ -23,9 +23,20 @@ ICON_SRC="$ROOT_DIR/Resources/AppIcon.icon"
 ICTOOL="/Applications/Icon Composer.app/Contents/Executables/ictool"
 
 if [ -d "$ICON_SRC" ]; then
-    cp -R "$ICON_SRC" "$RESOURCES_DIR/AppIcon.icon"
-    if [ -x "$ICTOOL" ]; then
-        echo "Rendering AppIcon.icns from AppIcon.icon..."
+    if xcode-select -p 2>/dev/null | grep -q "Xcode"; then
+        echo "Compiling dynamic Assets.car and AppIcon.icns via Xcode actool..."
+        xcrun actool "$ICON_SRC" \
+            --compile "$RESOURCES_DIR" \
+            --app-icon AppIcon \
+            --enable-on-demand-resources NO \
+            --development-region en \
+            --target-device mac \
+            --platform macosx \
+            --minimum-deployment-target 26.0 \
+            --output-partial-info-plist "$ROOT_DIR/build/assetcatalog_generated_info.plist"
+    elif [ -x "$ICTOOL" ]; then
+        echo "Rendering static AppIcon.icns from AppIcon.icon (Xcode not installed)..."
+        cp -R "$ICON_SRC" "$RESOURCES_DIR/AppIcon.icon"
         ICONSET_DIR="$ROOT_DIR/build/AppIcon.iconset"
         rm -rf "$ICONSET_DIR"
         mkdir -p "$ICONSET_DIR"
