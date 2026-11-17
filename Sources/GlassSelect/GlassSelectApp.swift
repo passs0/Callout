@@ -58,6 +58,7 @@ final class GlassSelectApp: NSObject, NSApplicationDelegate {
         )
         toggleItem.target = self
         toggleItem.state = autoShow ? .on : .off
+        toggleItem.image = NSImage(systemSymbolName: "cursorarrow.click", accessibilityDescription: nil)
         menu.addItem(toggleItem)
         self.toggleMenuItem = toggleItem
 
@@ -67,6 +68,7 @@ final class GlassSelectApp: NSObject, NSApplicationDelegate {
             keyEquivalent: ""
         )
         triggerItem.target = self
+        triggerItem.image = NSImage(systemSymbolName: "text.viewfinder", accessibilityDescription: nil)
         menu.addItem(triggerItem)
 
         let previewItem = NSMenuItem(
@@ -75,6 +77,7 @@ final class GlassSelectApp: NSObject, NSApplicationDelegate {
             keyEquivalent: ""
         )
         previewItem.target = self
+        previewItem.image = NSImage(systemSymbolName: "eye", accessibilityDescription: nil)
         menu.addItem(previewItem)
 
         menu.addItem(.separator())
@@ -85,6 +88,10 @@ final class GlassSelectApp: NSObject, NSApplicationDelegate {
             keyEquivalent: ""
         )
         permItem.target = self
+        permItem.image = NSImage(
+            systemSymbolName: monitor.isAccessibilityGranted ? "checkmark.shield" : "hand.raised",
+            accessibilityDescription: nil
+        )
         menu.addItem(permItem)
         self.permissionMenuItem = permItem
 
@@ -94,6 +101,7 @@ final class GlassSelectApp: NSObject, NSApplicationDelegate {
             keyEquivalent: ","
         )
         settingsItem.target = self
+        settingsItem.image = NSImage(systemSymbolName: "gearshape", accessibilityDescription: nil)
         menu.addItem(settingsItem)
 
         menu.addItem(.separator())
@@ -104,6 +112,7 @@ final class GlassSelectApp: NSObject, NSApplicationDelegate {
             keyEquivalent: "q"
         )
         quitItem.target = self
+        quitItem.image = NSImage(systemSymbolName: "power", accessibilityDescription: nil)
         menu.addItem(quitItem)
 
         item.menu = menu
