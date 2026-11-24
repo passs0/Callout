@@ -4,10 +4,10 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT_DIR"
 
-echo "Building Callout (release)..."
-swift build -c release
+echo "Building Callout (release, dead-stripped)..."
+swift build -c release -Xlinker -dead_strip
 
-BIN_PATH="$(swift build -c release --show-bin-path)/Callout"
+BIN_PATH="$(swift build -c release -Xlinker -dead_strip --show-bin-path)/Callout"
 APP_DIR="$ROOT_DIR/build/Callout.app"
 CONTENTS_DIR="$APP_DIR/Contents"
 MACOS_DIR="$CONTENTS_DIR/MacOS"
@@ -17,6 +17,7 @@ rm -rf "$APP_DIR"
 mkdir -p "$MACOS_DIR" "$RESOURCES_DIR"
 
 cp "$BIN_PATH" "$MACOS_DIR/Callout"
+strip -rSTx "$MACOS_DIR/Callout"
 chmod +x "$MACOS_DIR/Callout"
 
 ICON_SRC="$ROOT_DIR/Resources/AppIcon.icon"
