@@ -41,7 +41,7 @@
 ## Installation
 
 ### Download Release
-1. Download **`Callout-1.0.1.dmg`** from [GitHub Releases](https://github.com/passs0/Callout/releases/latest) and drag **`Callout.app`** to `/Applications`.
+1. Download **`Callout-1.0.2.dmg`** from [GitHub Releases](https://github.com/passs0/Callout/releases/latest) and drag **`Callout.app`** to `/Applications`.
 2. On first launch, right-click `Callout.app` ➔ **Open**, or run `xattr -cr /Applications/Callout.app`.
 3. Grant **Accessibility** permission in **System Settings → Privacy & Security → Accessibility** so Callout can detect text selections across apps.
 
