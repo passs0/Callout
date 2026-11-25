@@ -7,8 +7,6 @@ struct SettingsView: View {
     @AppStorage("searchEngine") private var searchEngineRaw: String = SearchEngine.google.rawValue
     @AppStorage("translateTargetLang") private var translateTargetLang: String = "en"
 
-    var onTestPreview: () -> Void
-
     private let languages: [(code: String, name: String)] = [
         ("en", "English"),
         ("zh-Hant", "Chinese (Traditional)"),
@@ -72,7 +70,7 @@ struct SettingsView: View {
                 }
             }
 
-            Section("Shortcuts & Preview") {
+            Section("Shortcuts") {
                 LabeledContent("Trigger on Selection / Clipboard") {
                     Text("⌥ Space  or  ⌘⇧E")
                         .font(.system(.body, design: .monospaced))
@@ -83,18 +81,10 @@ struct SettingsView: View {
                         .font(.system(.body, design: .monospaced))
                         .foregroundStyle(.secondary)
                 }
-
-                HStack {
-                    Spacer()
-                    Button("Preview Floating Bar") {
-                        onTestPreview()
-                    }
-                    .buttonStyle(.bordered)
-                }
             }
         }
         .formStyle(.grouped)
-        .frame(width: 440, height: 380)
+        .frame(width: 440, height: 340)
         .onAppear {
             monitor.refreshAccessibilityStatus()
         }

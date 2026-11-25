@@ -71,15 +71,6 @@ final class CalloutApp: NSObject, NSApplicationDelegate {
         triggerItem.image = NSImage(systemSymbolName: "text.viewfinder", accessibilityDescription: nil)
         menu.addItem(triggerItem)
 
-        let previewItem = NSMenuItem(
-            title: "Preview Floating Bar",
-            action: #selector(previewBar),
-            keyEquivalent: ""
-        )
-        previewItem.target = self
-        previewItem.image = NSImage(systemSymbolName: "eye", accessibilityDescription: nil)
-        menu.addItem(previewItem)
-
         menu.addItem(.separator())
 
         let permItem = NSMenuItem(
@@ -138,17 +129,6 @@ final class CalloutApp: NSObject, NSApplicationDelegate {
         monitor.triggerManualSelectionAtCursor()
     }
 
-    @objc private func previewBar() {
-        let mouse = NSEvent.mouseLocation
-        let sample = TextSelectionEvent(
-            text: "마찬가지로",
-            anchorPoint: mouse,
-            selectionRect: nil,
-            frontmostBundleID: nil
-        )
-        panelController.show(for: sample)
-    }
-
     @objc private func handlePermissionClick() {
         monitor.refreshAccessibilityStatus()
         if !monitor.isAccessibilityGranted {
@@ -161,9 +141,7 @@ final class CalloutApp: NSObject, NSApplicationDelegate {
 
     @objc private func openSettings() {
         if settingsWindow == nil {
-            let view = SettingsView(monitor: monitor) { [weak self] in
-                self?.previewBar()
-            }
+            let view = SettingsView(monitor: monitor)
             let hosting = NSHostingController(rootView: view)
             let window = NSWindow(contentViewController: hosting)
             window.title = "Callout Settings"
