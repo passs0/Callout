@@ -50,7 +50,15 @@ final class FloatingPanelController {
     func dismiss() {
         guard let panel, panel.isVisible else { return }
         SpeechManager.shared.stop()
-        panel.orderOut(nil)
+        NSAnimationContext.runAnimationGroup({ ctx in
+            ctx.duration = 0.12
+            ctx.timingFunction = CAMediaTimingFunction(name: .easeIn)
+            panel.animator().alphaValue = 0
+        }, completionHandler: { [weak panel] in
+            Task { @MainActor in
+                panel?.orderOut(nil)
+            }
+        })
     }
 
     private func createPanel() {
@@ -103,7 +111,11 @@ final class FloatingPanelController {
         if initialShow {
             panel.setFrame(newFrame, display: true)
         } else {
-            panel.setFrame(newFrame, display: true, animate: true)
+            NSAnimationContext.runAnimationGroup { ctx in
+                ctx.duration = 0.22
+                ctx.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+                panel.animator().setFrame(newFrame, display: true)
+            }
         }
     }
 }
