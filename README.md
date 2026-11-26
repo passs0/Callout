@@ -25,7 +25,7 @@
 ## What it does
 
 - **Quick action pill:** Shows `Copy`, `Look Up`, `Translate`, `Find`, and `>` on text selection.
-- **Native macOS context menu:** Clicking `>` (or right-clicking the pill) opens a native macOS `NSMenu` with `Copy`, `Open Link`, `Look Up`, `Translate`, `Find`, `Search with Google / DuckDuckGo / Bing / Naver`, `Speak`, `Spell`, `Copy Link with Highlight`, `Share...`, `Add to Quick Note`, and `Ask Siri`.
+- **Native app context menu:** Clicking `>` (or right-clicking the pill) dismisses the pill and opens the active app's real macOS right-click context menu directly on your selection.
 - **On-device translation:** Uses Apple's `Translation` framework with configurable target language in Settings.
 - **Shortcuts:** Trigger manually anytime with `⌥ Space` or `⌘⇧E`.
 
