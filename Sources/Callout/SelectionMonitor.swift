@@ -111,7 +111,10 @@ final class SelectionMonitor: ObservableObject {
                 // Global shortcut: Option + Space (49) or Cmd + Shift + E (14)
                 if (modifiers == .option && keyCode == 49) || (modifiers == [.command, .shift] && keyCode == 14) {
                     self.triggerManualSelectionAtCursor()
+                    return
                 }
+                // Dismiss when the user starts typing, deleting, or editing
+                self.onDismissRequested?()
             }
         }
     }

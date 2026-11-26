@@ -2,7 +2,7 @@ import AppKit
 import SwiftUI
 
 private final class NonActivatingPanel: NSPanel {
-    override var canBecomeKey: Bool { true }
+    override var canBecomeKey: Bool { false }
     override var canBecomeMain: Bool { false }
 }
 
@@ -50,7 +50,6 @@ final class FloatingPanelController: NSObject {
         resizePanelKeepingAnchor(initialShow: true)
         panel?.alphaValue = 0
         panel?.orderFrontRegardless()
-        panel?.makeKey()
         NSAnimationContext.runAnimationGroup { ctx in
             ctx.duration = 0.14
             ctx.timingFunction = CAMediaTimingFunction(name: .easeOut)
