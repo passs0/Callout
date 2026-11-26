@@ -116,7 +116,7 @@ final class FloatingPanelController: NSObject {
     // MARK: - Native macOS Context Menu
 
     private func showNativeContextMenu() {
-        guard let hosting = hostingView else { return }
+        guard let panel else { return }
 
         let menu = NSMenu(title: "Callout")
         let snippet = truncatedSnippet(state.selectedText)
@@ -148,8 +148,9 @@ final class FloatingPanelController: NSObject {
         menu.addItem(makeMenuItem("Add to Quick Note", symbol: "note.text.badge.plus", action: #selector(menuQuickNote)))
         menu.addItem(makeMenuItem("Ask Siri", symbol: "siri", action: #selector(menuAskSiri)))
 
-        let anchorInView = NSPoint(x: hosting.bounds.maxX - 48, y: hosting.bounds.minY + 34)
-        menu.popUp(positioning: nil, at: anchorInView, in: hosting)
+        let screenAnchor = NSPoint(x: panel.frame.midX - 110, y: panel.frame.maxY - 32)
+        panel.orderOut(nil)
+        menu.popUp(positioning: nil, at: screenAnchor, in: nil)
     }
 
     private func makeMenuItem(_ title: String, symbol: String, action: Selector) -> NSMenuItem {
@@ -191,10 +192,12 @@ final class FloatingPanelController: NSObject {
     }
 
     @objc private func menuLookUp() {
+        panel?.orderFrontRegardless()
         state.triggerLookUp()
     }
 
     @objc private func menuTranslate() {
+        panel?.orderFrontRegardless()
         state.triggerTranslate()
     }
 
@@ -229,6 +232,7 @@ final class FloatingPanelController: NSObject {
 
     @objc private func menuShare() {
         guard let view = hostingView else { return }
+        panel?.orderFrontRegardless()
         TextActionRunner.share(state.selectedText, from: view)
     }
 

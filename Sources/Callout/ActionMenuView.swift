@@ -155,7 +155,7 @@ struct ActionMenuView: View {
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 6)
-        .glassEffect(.regular.interactive(), in: .capsule)
+        .glassEffect(.regular, in: .capsule)
         .glassEffectID("menuSurface", in: glassNamespace)
         .onSecondaryClick {
             state.onShowNativeMenu?()
