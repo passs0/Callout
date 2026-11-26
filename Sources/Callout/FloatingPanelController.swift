@@ -7,13 +7,14 @@ private final class NonActivatingPanel: NSPanel {
 }
 
 @MainActor
-final class FloatingPanelController {
+final class FloatingPanelController: NSObject {
     private var panel: NonActivatingPanel?
     private var hostingView: NSHostingView<ActionMenuView>?
     private let state = PopoverState()
     private var lastAnchor: NSPoint = .zero
 
-    init() {
+    override init() {
+        super.init()
         state.onRequestResize = { [weak self] in
             DispatchQueue.main.async {
                 self?.resizePanelKeepingAnchor()
@@ -25,6 +26,9 @@ final class FloatingPanelController {
         state.onShareRequested = { [weak self] text in
             guard let self, let view = self.hostingView else { return }
             TextActionRunner.share(text, from: view)
+        }
+        state.onShowNativeMenu = { [weak self] in
+            self?.showNativeContextMenu()
         }
     }
 
@@ -103,19 +107,140 @@ final class FloatingPanelController {
             originY = lastAnchor.y - 12
         }
 
-        // Clamp horizontally & vertically to screen visibleFrame
         originX = max(visibleFrame.minX - 24, min(originX, visibleFrame.maxX - size.width + 24))
         originY = max(visibleFrame.minY - 24, min(originY, visibleFrame.maxY - size.height + 24))
 
-        let newFrame = NSRect(x: originX, y: originY, width: size.width, height: size.height)
-        if initialShow {
-            panel.setFrame(newFrame, display: true)
-        } else {
-            NSAnimationContext.runAnimationGroup { ctx in
-                ctx.duration = 0.22
-                ctx.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-                panel.animator().setFrame(newFrame, display: true)
-            }
+        panel.setFrame(NSRect(x: originX, y: originY, width: size.width, height: size.height), display: true)
+    }
+
+    // MARK: - Native macOS Context Menu
+
+    private func showNativeContextMenu() {
+        guard let hosting = hostingView else { return }
+
+        let menu = NSMenu(title: "Callout")
+        let snippet = truncatedSnippet(state.selectedText)
+        let searchEngineRaw = UserDefaults.standard.string(forKey: "searchEngine") ?? SearchEngine.google.rawValue
+        let searchEngine = SearchEngine(rawValue: searchEngineRaw) ?? .google
+
+        menu.addItem(makeMenuItem("Copy", symbol: "doc.on.doc", action: #selector(menuCopy)))
+        menu.addItem(.separator())
+
+        if detectedURL(in: state.selectedText) != nil {
+            menu.addItem(makeMenuItem("Open Link", symbol: "safari", action: #selector(menuOpenLink)))
         }
+        menu.addItem(makeMenuItem("Look Up “\(snippet)”", symbol: "info.circle", action: #selector(menuLookUp)))
+        menu.addItem(makeMenuItem("Translate “\(snippet)”", symbol: "translate", action: #selector(menuTranslate)))
+        menu.addItem(makeMenuItem("Find", symbol: "magnifyingglass", action: #selector(menuFind)))
+        menu.addItem(makeMenuItem("Search with \(searchEngine.rawValue)", symbol: "magnifyingglass", action: #selector(menuSearchWeb)))
+
+        menu.addItem(.separator())
+
+        let speakTitle = SpeechManager.shared.isSpeaking ? "Stop Speaking" : "Speak"
+        let speakSymbol = SpeechManager.shared.isSpeaking ? "stop.fill" : "play"
+        menu.addItem(makeMenuItem(speakTitle, symbol: speakSymbol, action: #selector(menuSpeak)))
+        menu.addItem(makeMenuItem("Spell", symbol: "play", action: #selector(menuSpell)))
+
+        menu.addItem(.separator())
+
+        menu.addItem(makeMenuItem("Copy Link with Highlight", symbol: "text.quote", action: #selector(menuCopyHighlight)))
+        menu.addItem(makeMenuItem("Share...", symbol: "square.and.arrow.up", action: #selector(menuShare)))
+        menu.addItem(makeMenuItem("Add to Quick Note", symbol: "note.text.badge.plus", action: #selector(menuQuickNote)))
+        menu.addItem(makeMenuItem("Ask Siri", symbol: "siri", action: #selector(menuAskSiri)))
+
+        let anchorInView = NSPoint(x: hosting.bounds.maxX - 48, y: hosting.bounds.minY + 34)
+        menu.popUp(positioning: nil, at: anchorInView, in: hosting)
+    }
+
+    private func makeMenuItem(_ title: String, symbol: String, action: Selector) -> NSMenuItem {
+        let item = NSMenuItem(title: title, action: action, keyEquivalent: "")
+        item.target = self
+        item.image = NSImage(systemSymbolName: symbol, accessibilityDescription: nil)
+        return item
+    }
+
+    private func truncatedSnippet(_ text: String) -> String {
+        let cleaned = text
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .replacingOccurrences(of: "\n", with: " ")
+        if cleaned.count <= 14 {
+            return cleaned
+        }
+        return String(cleaned.prefix(14)) + "…"
+    }
+
+    private func detectedURL(in text: String) -> URL? {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue) else {
+            return nil
+        }
+        let range = NSRange(trimmed.startIndex..., in: trimmed)
+        return detector.firstMatch(in: trimmed, range: range)?.url
+    }
+
+    @objc private func menuCopy() {
+        TextActionRunner.copy(state.selectedText)
+        dismiss()
+    }
+
+    @objc private func menuOpenLink() {
+        if let url = detectedURL(in: state.selectedText) {
+            NSWorkspace.shared.open(url)
+        }
+        dismiss()
+    }
+
+    @objc private func menuLookUp() {
+        state.triggerLookUp()
+    }
+
+    @objc private func menuTranslate() {
+        state.triggerTranslate()
+    }
+
+    @objc private func menuFind() {
+        let text = state.selectedText
+        dismiss()
+        TextActionRunner.findInFrontmostApp(text)
+    }
+
+    @objc private func menuSearchWeb() {
+        let raw = UserDefaults.standard.string(forKey: "searchEngine") ?? SearchEngine.google.rawValue
+        let engine = SearchEngine(rawValue: raw) ?? .google
+        TextActionRunner.searchWeb(state.selectedText, engine: engine)
+        dismiss()
+    }
+
+    @objc private func menuSpeak() {
+        SpeechManager.shared.toggleSpeak(state.selectedText)
+    }
+
+    @objc private func menuSpell() {
+        SpeechManager.shared.spellOut(state.selectedText)
+    }
+
+    @objc private func menuCopyHighlight() {
+        _ = TextActionRunner.copyLinkWithHighlight(
+            state.selectedText,
+            frontmostBundleID: state.frontmostBundleID
+        )
+        dismiss()
+    }
+
+    @objc private func menuShare() {
+        guard let view = hostingView else { return }
+        TextActionRunner.share(state.selectedText, from: view)
+    }
+
+    @objc private func menuQuickNote() {
+        let text = state.selectedText
+        dismiss()
+        TextActionRunner.newQuickNote(text)
+    }
+
+    @objc private func menuAskSiri() {
+        let text = state.selectedText
+        dismiss()
+        TextActionRunner.askSiri(text)
     }
 }

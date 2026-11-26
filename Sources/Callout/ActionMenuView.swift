@@ -14,15 +14,26 @@ final class PopoverState: ObservableObject {
     @Published var selectedText: String = ""
     @Published var frontmostBundleID: String?
     @Published var mode: PopoverDisplayMode = .compactPill
+    @Published var lookUpNonce: Int = 0
+    @Published var translateNonce: Int = 0
 
     var onRequestResize: (() -> Void)?
     var onDismiss: (() -> Void)?
     var onShareRequested: ((String) -> Void)?
+    var onShowNativeMenu: (() -> Void)?
 
     func reset(text: String, bundleID: String?) {
         selectedText = text
         frontmostBundleID = bundleID
         mode = .compactPill
+    }
+
+    func triggerLookUp() {
+        lookUpNonce &+= 1
+    }
+
+    func triggerTranslate() {
+        translateNonce &+= 1
     }
 }
 
@@ -67,6 +78,12 @@ struct ActionMenuView: View {
         .padding(32)
         .fixedSize()
         .environment(\.controlActiveState, .active)
+        .onChange(of: state.lookUpNonce) { _, _ in
+            openLookUp()
+        }
+        .onChange(of: state.translateNonce) { _, _ in
+            openTranslate()
+        }
         .translationTask(translationConfig) { @Sendable session in
             let text = await MainActor.run { state.selectedText }
             do {
@@ -127,10 +144,7 @@ struct ActionMenuView: View {
                 .padding(.horizontal, 2)
 
             Button {
-                withAnimation {
-                    state.mode = .expandedMenu
-                }
-                state.onRequestResize?()
+                state.onShowNativeMenu?()
             } label: {
                 Image(systemName: "chevron.right")
                     .frame(width: 26, height: 26)
@@ -144,10 +158,7 @@ struct ActionMenuView: View {
         .glassEffect(.regular.interactive(), in: .capsule)
         .glassEffectID("menuSurface", in: glassNamespace)
         .onSecondaryClick {
-            withAnimation {
-                state.mode = .expandedMenu
-            }
-            state.onRequestResize?()
+            state.onShowNativeMenu?()
         }
     }
 
