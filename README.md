@@ -15,9 +15,7 @@
 </p>
 
 <p align="center">
-  <img src="assets/callout_pill.png" width="380" alt="Callout Pill" />
-  <br/><br/>
-  <img src="assets/callout_menu_native.png" width="380" alt="Callout Native Context Menu" />
+  <img src="assets/callout_demo.gif" width="400" alt="Callout Demo" />
 </p>
 
 ---
