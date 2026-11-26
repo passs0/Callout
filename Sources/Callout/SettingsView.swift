@@ -71,20 +71,14 @@ struct SettingsView: View {
             }
 
             Section("Shortcuts") {
-                LabeledContent("Trigger on Selection / Clipboard") {
-                    Text("⌥ Space  or  ⌘⇧E")
-                        .font(.system(.body, design: .monospaced))
-                        .foregroundStyle(.secondary)
-                }
-                LabeledContent("Dismiss Menu") {
-                    Text("Esc  or  Click Outside")
-                        .font(.system(.body, design: .monospaced))
+                LabeledContent("Show Callout") {
+                    Text("⌥ Space, ⌘⇧E")
                         .foregroundStyle(.secondary)
                 }
             }
         }
         .formStyle(.grouped)
-        .frame(width: 440, height: 340)
+        .frame(width: 440, height: 300)
         .onAppear {
             monitor.refreshAccessibilityStatus()
         }
