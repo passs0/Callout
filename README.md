@@ -17,15 +17,15 @@
 <p align="center">
   <img src="assets/callout_pill.png" width="380" alt="Callout Pill" />
   <br/><br/>
-  <img src="assets/callout_menu.png" width="380" alt="Callout Expanded Menu" />
+  <img src="assets/callout_menu_native.png" width="380" alt="Callout Native Context Menu" />
 </p>
 
 ---
 
 ## What it does
 
-- **Quick action pill:** Shows `Copy`, `Look Up`, `Translate`, `Find`, and an expand button (`>`) on text selection.
-- **Expanded menu:** Open detected links, search with Google/DuckDuckGo/Bing/Naver, speak or spell out text (`AVSpeechSynthesizer`), copy highlight links (`#:~:text=`), share, or start a Quick Note.
+- **Quick action pill:** Shows `Copy`, `Look Up`, `Translate`, `Find`, and `>` on text selection.
+- **Native macOS context menu:** Clicking `>` (or right-clicking the pill) opens a native macOS `NSMenu` with `Copy`, `Open Link`, `Look Up`, `Translate`, `Find`, `Search with Google / DuckDuckGo / Bing / Naver`, `Speak`, `Spell`, `Copy Link with Highlight`, `Share...`, `Add to Quick Note`, and `Ask Siri`.
 - **On-device translation:** Uses Apple's `Translation` framework with configurable target language in Settings.
 - **Shortcuts:** Trigger manually anytime with `⌥ Space` or `⌘⇧E`.
 
