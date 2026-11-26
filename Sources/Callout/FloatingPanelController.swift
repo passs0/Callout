@@ -21,7 +21,7 @@ final class FloatingPanelController: NSObject {
             }
         }
         state.onDismiss = { [weak self] in
-            self?.dismiss()
+            self?.dismiss(immediate: true)
         }
         state.onShareRequested = { [weak self] text in
             guard let self, let view = self.hostingView else { return }
@@ -44,6 +44,7 @@ final class FloatingPanelController: NSObject {
         resizePanelKeepingAnchor(initialShow: true)
         panel?.alphaValue = 0
         panel?.orderFrontRegardless()
+        panel?.makeKey()
         NSAnimationContext.runAnimationGroup { ctx in
             ctx.duration = 0.14
             ctx.timingFunction = CAMediaTimingFunction(name: .easeOut)
@@ -51,9 +52,13 @@ final class FloatingPanelController: NSObject {
         }
     }
 
-    func dismiss() {
+    func dismiss(immediate: Bool = false) {
         guard let panel, panel.isVisible else { return }
         SpeechManager.shared.stop()
+        if immediate {
+            panel.orderOut(nil)
+            return
+        }
         NSAnimationContext.runAnimationGroup({ ctx in
             ctx.duration = 0.12
             ctx.timingFunction = CAMediaTimingFunction(name: .easeIn)
