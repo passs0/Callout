@@ -4,7 +4,6 @@ import SwiftUI
 struct SettingsView: View {
     @ObservedObject var monitor: SelectionMonitor
     @AppStorage("autoShowEnabled") private var autoShowEnabled: Bool = true
-    @AppStorage("searchEngine") private var searchEngineRaw: String = SearchEngine.google.rawValue
     @AppStorage("translateTargetLang") private var translateTargetLang: String = "en"
 
     private let languages: [(code: String, name: String)] = [
@@ -56,12 +55,6 @@ struct SettingsView: View {
                     .onChange(of: autoShowEnabled) { _, newValue in
                         monitor.setEnabled(newValue)
                     }
-
-                Picker("Search Engine", selection: $searchEngineRaw) {
-                    ForEach(SearchEngine.allCases) { engine in
-                        Text(engine.rawValue).tag(engine.rawValue)
-                    }
-                }
 
                 Picker("Translate To", selection: $translateTargetLang) {
                     ForEach(languages, id: \.code) { lang in

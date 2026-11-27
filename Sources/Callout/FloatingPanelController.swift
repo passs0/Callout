@@ -14,6 +14,8 @@ final class FloatingPanelController: NSObject {
     private var lastAnchor: NSPoint = .zero
     private var lastSelectionCenter: NSPoint = .zero
 
+    var isVisible: Bool { panel?.isVisible == true }
+
     override init() {
         super.init()
         state.onRequestResize = { [weak self] in
@@ -24,17 +26,12 @@ final class FloatingPanelController: NSObject {
         state.onDismiss = { [weak self] in
             self?.dismiss(immediate: true)
         }
-        state.onShareRequested = { [weak self] text in
-            guard let self, let view = self.hostingView else { return }
-            TextActionRunner.share(text, from: view)
-        }
         state.onShowNativeMenu = { [weak self] in
             self?.showNativeContextMenu()
         }
     }
 
     func show(for event: TextSelectionEvent) {
-        SpeechManager.shared.stop()
         state.reset(text: event.text, bundleID: event.frontmostBundleID)
         lastAnchor = event.anchorPoint
         if let rect = event.selectionRect {
@@ -59,7 +56,6 @@ final class FloatingPanelController: NSObject {
 
     func dismiss(immediate: Bool = false) {
         guard let panel, panel.isVisible else { return }
-        SpeechManager.shared.stop()
         if immediate {
             panel.orderOut(nil)
             return

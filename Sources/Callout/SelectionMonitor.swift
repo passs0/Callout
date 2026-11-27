@@ -14,6 +14,7 @@ final class SelectionMonitor: ObservableObject {
 
     var onSelectionDetected: ((TextSelectionEvent) -> Void)?
     var onDismissRequested: (() -> Void)?
+    var isPanelVisible: (() -> Bool)?
 
     private var mouseDownMonitor: Any?
     private var mouseUpMonitor: Any?
@@ -94,28 +95,21 @@ final class SelectionMonitor: ObservableObject {
         }
 
         scrollMonitor = NSEvent.addGlobalMonitorForEvents(matching: .scrollWheel) { [weak self] _ in
-            Task { @MainActor [weak self] in
-                self?.onDismissRequested?()
-            }
+            guard let self, self.isPanelVisible?() == true else { return }
+            self.onDismissRequested?()
         }
 
         keyDownMonitor = NSEvent.addGlobalMonitorForEvents(matching: .keyDown) { [weak self] event in
+            guard let self else { return }
             let keyCode = event.keyCode
             let modifiers = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
-            Task { @MainActor [weak self] in
-                guard let self else { return }
-                if keyCode == 53 { // Escape
-                    self.onDismissRequested?()
-                    return
-                }
-                // Global shortcut: Option + Space (49) or Cmd + Shift + E (14)
-                if (modifiers == .option && keyCode == 49) || (modifiers == [.command, .shift] && keyCode == 14) {
-                    self.triggerManualSelectionAtCursor()
-                    return
-                }
-                // Dismiss when the user starts typing, deleting, or editing
-                self.onDismissRequested?()
+            // Global shortcut: Option + Space (49) or Cmd + Shift + E (14)
+            if (modifiers == .option && keyCode == 49) || (modifiers == [.command, .shift] && keyCode == 14) {
+                self.triggerManualSelectionAtCursor()
+                return
             }
+            guard self.isPanelVisible?() == true else { return }
+            self.onDismissRequested?()
         }
     }
 

@@ -16,10 +16,8 @@ let package = Package(
             linkerSettings: [
                 .linkedFramework("AppKit"),
                 .linkedFramework("SwiftUI"),
-                .linkedFramework("AVFoundation"),
                 .linkedFramework("NaturalLanguage"),
                 .linkedFramework("CoreServices"),
-                .linkedFramework("Carbon"),
                 .linkedFramework("Translation")
             ]
         )

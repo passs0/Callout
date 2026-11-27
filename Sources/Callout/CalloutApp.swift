@@ -31,6 +31,9 @@ final class CalloutApp: NSObject, NSApplicationDelegate {
         monitor.onDismissRequested = { [weak self] in
             self?.panelController.dismiss()
         }
+        monitor.isPanelVisible = { [weak self] in
+            self?.panelController.isVisible == true
+        }
         monitor.start()
 
         if !monitor.isAccessibilityGranted {

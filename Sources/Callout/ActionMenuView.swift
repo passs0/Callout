@@ -4,7 +4,6 @@ import Translation
 
 enum PopoverDisplayMode: Equatable {
     case compactPill
-    case expandedMenu
     case lookUpResult(definition: String?)
     case translateResult(translated: String?, sourceLang: String?, isLoading: Bool)
 }
@@ -14,12 +13,9 @@ final class PopoverState: ObservableObject {
     @Published var selectedText: String = ""
     @Published var frontmostBundleID: String?
     @Published var mode: PopoverDisplayMode = .compactPill
-    @Published var lookUpNonce: Int = 0
-    @Published var translateNonce: Int = 0
 
     var onRequestResize: (() -> Void)?
     var onDismiss: (() -> Void)?
-    var onShareRequested: ((String) -> Void)?
     var onShowNativeMenu: (() -> Void)?
 
     func reset(text: String, bundleID: String?) {
@@ -27,38 +23,14 @@ final class PopoverState: ObservableObject {
         frontmostBundleID = bundleID
         mode = .compactPill
     }
-
-    func triggerLookUp() {
-        lookUpNonce &+= 1
-    }
-
-    func triggerTranslate() {
-        translateNonce &+= 1
-    }
 }
 
 struct ActionMenuView: View {
     @ObservedObject var state: PopoverState
-    @ObservedObject var speech = SpeechManager.shared
-    @AppStorage("searchEngine") private var searchEngineRaw: String = SearchEngine.google.rawValue
     @AppStorage("translateTargetLang") private var translateTargetLang: String = "en"
     @Namespace private var glassNamespace
     @State private var translationConfig: TranslationSession.Configuration?
     @State private var showSystemTranslate: Bool = false
-
-    private var searchEngine: SearchEngine {
-        SearchEngine(rawValue: searchEngineRaw) ?? .google
-    }
-
-    private var truncatedSnippet: String {
-        let cleaned = state.selectedText
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-            .replacingOccurrences(of: "\n", with: " ")
-        if cleaned.count <= 14 {
-            return cleaned
-        }
-        return String(cleaned.prefix(14)) + "…"
-    }
 
     var body: some View {
         GlassEffectContainer(spacing: 12) {
@@ -66,8 +38,6 @@ struct ActionMenuView: View {
                 switch state.mode {
                 case .compactPill:
                     compactPillView
-                case .expandedMenu:
-                    expandedMenuView
                 case .lookUpResult(let definition):
                     lookUpResultView(definition: definition)
                 case .translateResult(let translated, let sourceLang, let isLoading):
@@ -78,12 +48,6 @@ struct ActionMenuView: View {
         .padding(32)
         .fixedSize()
         .environment(\.controlActiveState, .active)
-        .onChange(of: state.lookUpNonce) { _, _ in
-            openLookUp()
-        }
-        .onChange(of: state.translateNonce) { _, _ in
-            openTranslate()
-        }
         .translationTask(translationConfig) { @Sendable session in
             let text = await MainActor.run { state.selectedText }
             do {
@@ -172,120 +136,6 @@ struct ActionMenuView: View {
                 .contentShape(Capsule())
         }
         .buttonStyle(HoverHighlightButtonStyle(shape: AnyShape(Capsule())))
-    }
-
-    // MARK: - Expanded Vertical Menu
-
-    private var expandedMenuView: some View {
-        VStack(spacing: 0) {
-            Button {
-                TextActionRunner.copy(state.selectedText)
-                state.onDismiss?()
-            } label: {
-                VStack(spacing: 4) {
-                    Image(systemName: "doc.on.doc")
-                        .font(.title3)
-                    Text("Copy")
-                        .font(.caption.weight(.semibold))
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 10)
-                .contentShape(Rectangle())
-            }
-            .buttonStyle(HoverHighlightButtonStyle(shape: AnyShape(RoundedRectangle(cornerRadius: 16, style: .continuous))))
-            .padding(.horizontal, 8)
-            .padding(.top, 8)
-            .padding(.bottom, 4)
-
-            Divider()
-                .padding(.horizontal, 14)
-
-            VStack(spacing: 1) {
-                if let url = detectedURL(in: state.selectedText) {
-                    menuRow(icon: "safari", title: "Open Link") {
-                        NSWorkspace.shared.open(url)
-                        state.onDismiss?()
-                    }
-                }
-                menuRow(icon: "info.circle", title: "Look Up “\(truncatedSnippet)”") {
-                    openLookUp()
-                }
-                menuRow(icon: "translate", title: "Translate “\(truncatedSnippet)”") {
-                    openTranslate()
-                }
-                menuRow(icon: "magnifyingglass", title: "Find") {
-                    let text = state.selectedText
-                    state.onDismiss?()
-                    TextActionRunner.findInFrontmostApp(text)
-                }
-                menuRow(icon: "magnifyingglass", title: "Search with \(searchEngine.rawValue)") {
-                    TextActionRunner.searchWeb(state.selectedText, engine: searchEngine)
-                    state.onDismiss?()
-                }
-            }
-            .padding(.vertical, 4)
-
-            Divider()
-                .padding(.horizontal, 14)
-
-            VStack(spacing: 1) {
-                menuRow(
-                    icon: speech.isSpeaking ? "stop.fill" : "play",
-                    title: speech.isSpeaking ? "Stop Speaking" : "Speak"
-                ) {
-                    speech.toggleSpeak(state.selectedText)
-                }
-                menuRow(icon: "play", title: "Spell") {
-                    speech.spellOut(state.selectedText)
-                }
-            }
-            .padding(.vertical, 4)
-
-            Divider()
-                .padding(.horizontal, 14)
-
-            VStack(spacing: 1) {
-                menuRow(icon: "text.quote", title: "Copy Link with Highlight") {
-                    _ = TextActionRunner.copyLinkWithHighlight(
-                        state.selectedText,
-                        frontmostBundleID: state.frontmostBundleID
-                    )
-                    state.onDismiss?()
-                }
-                menuRow(icon: "square.and.arrow.up", title: "Share...") {
-                    state.onShareRequested?(state.selectedText)
-                }
-                menuRow(icon: "note.text.badge.plus", title: "Add to Quick Note") {
-                    let text = state.selectedText
-                    state.onDismiss?()
-                    TextActionRunner.newQuickNote(text)
-                }
-                menuRow(icon: "siri", title: "Ask Siri") {
-                    let text = state.selectedText
-                    state.onDismiss?()
-                    TextActionRunner.askSiri(text)
-                }
-            }
-            .padding(.top, 4)
-            .padding(.bottom, 8)
-        }
-        .frame(width: 248)
-        .glassEffect(.regular.interactive(), in: RoundedRectangle(cornerRadius: 24, style: .continuous))
-        .glassEffectID("menuSurface", in: glassNamespace)
-    }
-
-    private func menuRow(icon: String, title: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Label(title, systemImage: icon)
-                .lineLimit(1)
-                .truncationMode(.tail)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                .contentShape(Rectangle())
-        }
-        .buttonStyle(HoverHighlightButtonStyle(shape: AnyShape(RoundedRectangle(cornerRadius: 16, style: .continuous))))
-        .padding(.horizontal, 8)
     }
 
     // MARK: - Inline Look Up Card
@@ -513,15 +363,6 @@ struct ActionMenuView: View {
         }
         return nil
     }
-
-    private func detectedURL(in text: String) -> URL? {
-        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue) else {
-            return nil
-        }
-        let range = NSRange(trimmed.startIndex..., in: trimmed)
-        return detector.firstMatch(in: trimmed, range: range)?.url
-    }
 }
 
 struct HoverHighlightButtonStyle: ButtonStyle {
@@ -543,9 +384,6 @@ struct HoverHighlightButtonStyle: ButtonStyle {
                 AlwaysActiveTrackingView { hovering in
                     isHovered = hovering
                 }
-            }
-            .onHover { hovering in
-                isHovered = hovering
             }
     }
 }

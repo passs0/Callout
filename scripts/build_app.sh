@@ -74,15 +74,13 @@ cat > "$CONTENTS_DIR/Info.plist" << 'EOF'
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>
-    <string>1.0.2</string>
+    <string>1.0.3</string>
     <key>CFBundleVersion</key>
-    <string>3</string>
+    <string>4</string>
     <key>LSMinimumSystemVersion</key>
     <string>26.0</string>
     <key>LSUIElement</key>
     <true/>
-    <key>NSAppleEventsUsageDescription</key>
-    <string>Callout uses Apple Events to get the active browser URL for Copy Link with Highlight and to add Quick Notes in Apple Notes.</string>
     <key>NSHighResolutionCapable</key>
     <true/>
 </dict>
@@ -91,7 +89,7 @@ EOF
 
 echo -n "APPL????" > "$CONTENTS_DIR/PkgInfo"
 
-echo "Signing GlassSelect.app (ad-hoc)..."
+echo "Signing Callout.app (ad-hoc)..."
 codesign --force --deep --sign - "$APP_DIR"
 
 echo "Done! App bundle created at: $APP_DIR"
