@@ -58,6 +58,12 @@ enum TextActionRunner {
         }
     }
 
+    static func askSiri(_ text: String) {
+        copy(text)
+        let siriURL = URL(fileURLWithPath: "/System/Applications/Siri.app")
+        NSWorkspace.shared.openApplication(at: siriURL, configuration: NSWorkspace.OpenConfiguration())
+    }
+
     private static func sendKeyCombo(keyCode: CGKeyCode, flags: CGEventFlags) {
         guard let source = CGEventSource(stateID: .hidSystemState),
               let keyDown = CGEvent(keyboardEventSource: source, virtualKey: keyCode, keyDown: true),
