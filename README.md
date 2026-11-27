@@ -29,7 +29,7 @@
 
 ## Install
 
-Download **`Callout-1.0.2.dmg`** from [Releases](https://github.com/passs0/Callout/releases/latest) and drag `Callout.app` to `/Applications`.
+Download the `.dmg` from [Releases](https://github.com/passs0/Callout/releases/latest) and drag `Callout.app` to `/Applications`.
 
 Grant **Accessibility** permission in **System Settings → Privacy & Security → Accessibility** so Callout can read selected text across apps.
 
