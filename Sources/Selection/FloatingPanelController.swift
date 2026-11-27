@@ -54,6 +54,17 @@ final class FloatingPanelController: NSObject {
         }
     }
 
+    func updatePosition(anchor: NSPoint, selectionRect: NSRect?) {
+        guard let panel, panel.isVisible else { return }
+        lastAnchor = anchor
+        if let rect = selectionRect {
+            lastSelectionCenter = NSPoint(x: rect.midX, y: rect.midY)
+        } else {
+            lastSelectionCenter = NSPoint(x: anchor.x, y: anchor.y + 10)
+        }
+        resizePanelKeepingAnchor()
+    }
+
     func dismiss(immediate: Bool = false) {
         guard let panel, panel.isVisible else { return }
         if immediate {

@@ -13,6 +13,7 @@ final class SelectionMonitor: ObservableObject {
     @Published var isAccessibilityGranted: Bool = AXIsProcessTrusted()
 
     var onSelectionDetected: ((TextSelectionEvent) -> Void)?
+    var onSelectionMoved: ((NSPoint, NSRect?) -> Void)?
     var onDismissRequested: (() -> Void)?
     var isPanelVisible: (() -> Bool)?
 
@@ -27,6 +28,9 @@ final class SelectionMonitor: ObservableObject {
     private var isEnabled: Bool = true
     private var pendingWorkItem: DispatchWorkItem?
     private var isReadingSelection = false
+    private var lastTrackedElement: AXUIElement?
+    private var lastTrackedAnchor: NSPoint?
+    private var lastScrollUpdateTime: TimeInterval = 0
 
     func start() {
         refreshAccessibilityStatus()
@@ -94,9 +98,28 @@ final class SelectionMonitor: ObservableObject {
             }
         }
 
-        scrollMonitor = NSEvent.addGlobalMonitorForEvents(matching: .scrollWheel) { [weak self] _ in
-            guard let self, self.isPanelVisible?() == true else { return }
-            self.onDismissRequested?()
+        scrollMonitor = NSEvent.addGlobalMonitorForEvents(matching: .scrollWheel) { [weak self] event in
+            let deltaY = event.scrollingDeltaY
+            let deltaX = event.scrollingDeltaX
+            let isPrecise = event.hasPreciseScrollingDeltas
+            Task { @MainActor [weak self] in
+                guard let self, self.isPanelVisible?() == true else { return }
+                let now = ProcessInfo.processInfo.systemUptime
+                guard now - self.lastScrollUpdateTime >= 0.016 else { return }
+                self.lastScrollUpdateTime = now
+
+                if let element = self.lastTrackedElement,
+                   let rect = self.readSelectionBounds(from: element) {
+                    let anchor = NSPoint(x: rect.midX, y: rect.minY)
+                    self.lastTrackedAnchor = anchor
+                    self.onSelectionMoved?(anchor, rect)
+                } else if let prev = self.lastTrackedAnchor {
+                    let scale: CGFloat = isPrecise ? 1.0 : 12.0
+                    let next = NSPoint(x: prev.x - deltaX * scale, y: prev.y + deltaY * scale)
+                    self.lastTrackedAnchor = next
+                    self.onSelectionMoved?(next, nil)
+                }
+            }
         }
 
         keyDownMonitor = NSEvent.addGlobalMonitorForEvents(matching: .keyDown) { [weak self] event in
@@ -257,6 +280,8 @@ final class SelectionMonitor: ObservableObject {
 
         let rect = readSelectionBounds(from: element)
         let anchor = rect.map { NSPoint(x: $0.midX, y: $0.minY) } ?? fallbackPoint
+        lastTrackedElement = element
+        lastTrackedAnchor = anchor
 
         return TextSelectionEvent(
             text: selectedText,

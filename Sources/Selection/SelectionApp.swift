@@ -28,6 +28,9 @@ final class SelectionApp: NSObject, NSApplicationDelegate {
         monitor.onSelectionDetected = { [weak self] event in
             self?.panelController.show(for: event)
         }
+        monitor.onSelectionMoved = { [weak self] anchor, rect in
+            self?.panelController.updatePosition(anchor: anchor, selectionRect: rect)
+        }
         monitor.onDismissRequested = { [weak self] in
             self?.panelController.dismiss()
         }

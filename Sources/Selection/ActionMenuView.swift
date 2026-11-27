@@ -33,16 +33,14 @@ struct ActionMenuView: View {
     @State private var showSystemTranslate: Bool = false
 
     var body: some View {
-        GlassEffectContainer(spacing: 12) {
-            Group {
-                switch state.mode {
-                case .compactPill:
-                    compactPillView
-                case .lookUpResult(let definition):
-                    lookUpResultView(definition: definition)
-                case .translateResult(let translated, let sourceLang, let isLoading):
-                    translateResultView(translated: translated, sourceLang: sourceLang, isLoading: isLoading)
-                }
+        Group {
+            switch state.mode {
+            case .compactPill:
+                compactPillView
+            case .lookUpResult(let definition):
+                lookUpResultView(definition: definition)
+            case .translateResult(let translated, let sourceLang, let isLoading):
+                translateResultView(translated: translated, sourceLang: sourceLang, isLoading: isLoading)
             }
         }
         .padding(32)
@@ -109,6 +107,21 @@ struct ActionMenuView: View {
                 TextActionRunner.findInFrontmostApp(text)
             }
 
+            pillDivider
+
+            Button {
+                let text = state.selectedText
+                state.onDismiss?()
+                TextActionRunner.askSiri(text)
+            } label: {
+                Image(systemName: "siri")
+                    .font(.system(size: 13, weight: .medium))
+                    .frame(width: 28, height: 26)
+                    .contentShape(Capsule())
+            }
+            .buttonStyle(HoverHighlightButtonStyle(shape: AnyShape(Capsule())))
+            .help("Ask Siri")
+
             Button {
                 state.onShowNativeMenu?()
             } label: {
@@ -124,8 +137,7 @@ struct ActionMenuView: View {
         .padding(.leading, 10)
         .padding(.trailing, 6)
         .padding(.vertical, 5)
-        .glassEffect(.clear, in: .capsule)
-        .glassEffectID("menuSurface", in: glassNamespace)
+        .background(AppleGlassBackground(style: .clear, isCapsule: true))
         .onSecondaryClick {
             state.onShowNativeMenu?()
         }
@@ -373,6 +385,49 @@ struct ActionMenuView: View {
             return "en"
         }
         return nil
+    }
+}
+
+struct AppleGlassBackground: NSViewRepresentable {
+    var style: NSGlassEffectView.Style = .clear
+    var cornerRadius: CGFloat = 22
+    var isCapsule: Bool = false
+
+    func makeNSView(context: Context) -> GlassContainerNSView {
+        let view = GlassContainerNSView()
+        view.glassView.style = style
+        view.isCapsule = isCapsule
+        view.fixedCornerRadius = cornerRadius
+        return view
+    }
+
+    func updateNSView(_ nsView: GlassContainerNSView, context: Context) {
+        nsView.glassView.style = style
+        nsView.isCapsule = isCapsule
+        nsView.fixedCornerRadius = cornerRadius
+        nsView.needsLayout = true
+    }
+
+    final class GlassContainerNSView: NSView {
+        let glassView = NSGlassEffectView()
+        var isCapsule = false
+        var fixedCornerRadius: CGFloat = 22
+
+        override init(frame frameRect: NSRect) {
+            super.init(frame: frameRect)
+            glassView.autoresizingMask = [.width, .height]
+            addSubview(glassView)
+        }
+
+        required init?(coder: NSCoder) {
+            fatalError("init(coder:) has not been implemented")
+        }
+
+        override func layout() {
+            super.layout()
+            glassView.frame = bounds
+            glassView.cornerRadius = isCapsule ? bounds.height / 2 : fixedCornerRadius
+        }
     }
 }
 
