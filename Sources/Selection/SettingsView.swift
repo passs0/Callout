@@ -1,10 +1,12 @@
 import AppKit
+import ServiceManagement
 import SwiftUI
 
 struct SettingsView: View {
     @ObservedObject var monitor: SelectionMonitor
     @AppStorage("autoShowEnabled") private var autoShowEnabled: Bool = true
     @AppStorage("translateTargetLang") private var translateTargetLang: String = "en"
+    @State private var openAtLogin: Bool = (SMAppService.mainApp.status == .enabled)
 
     private let languages: [(code: String, name: String)] = [
         ("en", "English"),
@@ -54,6 +56,19 @@ struct SettingsView: View {
                 Toggle("Show automatically when selecting text", isOn: $autoShowEnabled)
                     .onChange(of: autoShowEnabled) { _, newValue in
                         monitor.setEnabled(newValue)
+                    }
+
+                Toggle("Open at login", isOn: $openAtLogin)
+                    .onChange(of: openAtLogin) { _, enabled in
+                        do {
+                            if enabled {
+                                try SMAppService.mainApp.register()
+                            } else {
+                                try SMAppService.mainApp.unregister()
+                            }
+                        } catch {
+                            openAtLogin = (SMAppService.mainApp.status == .enabled)
+                        }
                     }
 
                 Picker("Translate To", selection: $translateTargetLang) {
