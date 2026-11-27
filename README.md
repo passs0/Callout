@@ -29,7 +29,7 @@
 
 ## Install
 
-Download **`Selection-1.1.0.dmg`** from [Releases](https://github.com/passs0/Selection/releases/latest) and drag `Selection.app` to `/Applications`.
+Download **`Selection-1.2.0.dmg`** from [Releases](https://github.com/passs0/Selection/releases/latest) and drag `Selection.app` to `/Applications`.
 
 Grant **Accessibility** permission in **System Settings → Privacy & Security → Accessibility** so Selection can read selected text across apps.
 
