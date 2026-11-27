@@ -3,7 +3,7 @@ import SwiftUI
 
 @main
 @MainActor
-final class CalloutApp: NSObject, NSApplicationDelegate {
+final class SelectionApp: NSObject, NSApplicationDelegate {
     private let monitor = SelectionMonitor()
     private let panelController = FloatingPanelController()
     private var statusItem: NSStatusItem?
@@ -13,7 +13,7 @@ final class CalloutApp: NSObject, NSApplicationDelegate {
 
     static func main() {
         let app = NSApplication.shared
-        let delegate = CalloutApp()
+        let delegate = SelectionApp()
         app.delegate = delegate
         app.setActivationPolicy(.accessory)
         app.run()
@@ -48,7 +48,7 @@ final class CalloutApp: NSObject, NSApplicationDelegate {
     private func setupStatusItem() {
         let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         if let button = item.button {
-            button.image = NSImage(systemSymbolName: "character.cursor.ibeam", accessibilityDescription: "Callout")
+            button.image = NSImage(systemSymbolName: "character.cursor.ibeam", accessibilityDescription: "Selection")
         }
 
         let menu = NSMenu()
@@ -101,7 +101,7 @@ final class CalloutApp: NSObject, NSApplicationDelegate {
         menu.addItem(.separator())
 
         let quitItem = NSMenuItem(
-            title: "Quit Callout",
+            title: "Quit Selection",
             action: #selector(quitApp),
             keyEquivalent: "q"
         )
@@ -147,7 +147,7 @@ final class CalloutApp: NSObject, NSApplicationDelegate {
             let view = SettingsView(monitor: monitor)
             let hosting = NSHostingController(rootView: view)
             let window = NSWindow(contentViewController: hosting)
-            window.title = "Callout Settings"
+            window.title = "Selection Settings"
             window.styleMask = [.titled, .closable, .miniaturizable]
             window.center()
             window.isReleasedWhenClosed = false

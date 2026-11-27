@@ -2,17 +2,17 @@
 import PackageDescription
 
 let package = Package(
-    name: "Callout",
+    name: "Selection",
     platforms: [
         .macOS(.v26)
     ],
     products: [
-        .executable(name: "Callout", targets: ["Callout"])
+        .executable(name: "Selection", targets: ["Selection"])
     ],
     targets: [
         .executableTarget(
-            name: "Callout",
-            path: "Sources/Callout",
+            name: "Selection",
+            path: "Sources/Selection",
             linkerSettings: [
                 .linkedFramework("AppKit"),
                 .linkedFramework("SwiftUI"),

@@ -4,11 +4,11 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT_DIR"
 
-echo "Building Callout (release, dead-stripped)..."
+echo "Building Selection (release, dead-stripped)..."
 swift build -c release -Xlinker -dead_strip
 
-BIN_PATH="$(swift build -c release -Xlinker -dead_strip --show-bin-path)/Callout"
-APP_DIR="$ROOT_DIR/build/Callout.app"
+BIN_PATH="$(swift build -c release -Xlinker -dead_strip --show-bin-path)/Selection"
+APP_DIR="$ROOT_DIR/build/Selection.app"
 CONTENTS_DIR="$APP_DIR/Contents"
 MACOS_DIR="$CONTENTS_DIR/MacOS"
 RESOURCES_DIR="$CONTENTS_DIR/Resources"
@@ -16,9 +16,9 @@ RESOURCES_DIR="$CONTENTS_DIR/Resources"
 rm -rf "$APP_DIR"
 mkdir -p "$MACOS_DIR" "$RESOURCES_DIR"
 
-cp "$BIN_PATH" "$MACOS_DIR/Callout"
-strip -rSTx "$MACOS_DIR/Callout"
-chmod +x "$MACOS_DIR/Callout"
+cp "$BIN_PATH" "$MACOS_DIR/Selection"
+strip -rSTx "$MACOS_DIR/Selection"
+chmod +x "$MACOS_DIR/Selection"
 
 ICON_SRC="$ROOT_DIR/Resources/AppIcon.icon"
 ICTOOL="/Applications/Icon Composer.app/Contents/Executables/ictool"
@@ -60,23 +60,23 @@ cat > "$CONTENTS_DIR/Info.plist" << 'EOF'
     <key>CFBundleDevelopmentRegion</key>
     <string>en</string>
     <key>CFBundleExecutable</key>
-    <string>Callout</string>
+    <string>Selection</string>
     <key>CFBundleIconFile</key>
     <string>AppIcon</string>
     <key>CFBundleIconName</key>
     <string>AppIcon</string>
     <key>CFBundleIdentifier</key>
-    <string>com.callout.app</string>
+    <string>com.passs0.selection</string>
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
     <key>CFBundleName</key>
-    <string>Callout</string>
+    <string>Selection</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>
-    <string>1.0.3</string>
+    <string>1.1.0</string>
     <key>CFBundleVersion</key>
-    <string>4</string>
+    <string>5</string>
     <key>LSMinimumSystemVersion</key>
     <string>26.0</string>
     <key>LSUIElement</key>
@@ -89,7 +89,7 @@ EOF
 
 echo -n "APPL????" > "$CONTENTS_DIR/PkgInfo"
 
-echo "Signing Callout.app (ad-hoc)..."
+echo "Signing Selection.app (ad-hoc)..."
 codesign --force --deep --sign - "$APP_DIR"
 
 echo "Done! App bundle created at: $APP_DIR"

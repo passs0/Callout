@@ -1,21 +1,21 @@
 <p align="center">
-  <img src="assets/icon_mac.png" width="160" height="160" alt="Callout Icon" />
+  <img src="assets/icon_mac.png" width="160" height="160" alt="Selection Icon" />
 </p>
 
-<h1 align="center">Callout</h1>
+<h1 align="center">Selection</h1>
 
 <p align="center">
   A macOS 26 floating text-selection bar and context menu that appears right where you select text.
 </p>
 
 <p align="center">
-  <a href="https://github.com/passs0/Callout/releases/latest"><img src="https://img.shields.io/github/v/release/passs0/Callout?label=Latest%20Release&color=007AFF" alt="Latest Release" /></a>
+  <a href="https://github.com/passs0/Selection/releases/latest"><img src="https://img.shields.io/github/v/release/passs0/Selection?label=Latest%20Release&color=007AFF" alt="Latest Release" /></a>
   <img src="https://img.shields.io/badge/macOS-26.0%2B%20%7C%20Apple%20Silicon-black?logo=apple" alt="macOS 26.0+" />
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="MIT License" /></a>
 </p>
 
 <p align="center">
-  <img src="assets/callout_demo.gif" width="400" alt="Callout Demo" />
+  <img src="assets/selection_demo.gif" width="400" alt="Selection Demo" />
 </p>
 
 ---
@@ -29,15 +29,15 @@
 
 ## Install
 
-Download the `.dmg` from [Releases](https://github.com/passs0/Callout/releases/latest) and drag `Callout.app` to `/Applications`.
+Download **`Selection-1.1.0.dmg`** from [Releases](https://github.com/passs0/Selection/releases/latest) and drag `Selection.app` to `/Applications`.
 
-Grant **Accessibility** permission in **System Settings → Privacy & Security → Accessibility** so Callout can read selected text across apps.
+Grant **Accessibility** permission in **System Settings → Privacy & Security → Accessibility** so Selection can read selected text across apps.
 
 Or build from source:
 ```zsh
-git clone https://github.com/passs0/Callout.git && cd Callout
+git clone https://github.com/passs0/Selection.git && cd Selection
 ./scripts/build_app.sh
-open build/Callout.app
+open build/Selection.app
 ```
 
 ## Credits

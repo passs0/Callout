@@ -64,7 +64,7 @@ struct SettingsView: View {
             }
 
             Section("Shortcuts") {
-                LabeledContent("Show Callout") {
+                LabeledContent("Show Selection") {
                     Text("⌥ Space, ⌘⇧E")
                         .foregroundStyle(.secondary)
                 }
