@@ -40,6 +40,8 @@ git clone https://github.com/passs0/Callout.git && cd Callout
 open build/Callout.app
 ```
 
+## Credits
+
 Built with [Google Antigravity](https://antigravity.google) — 100% AI-written code and UI, steered and tested by hand.
 
 ## License
