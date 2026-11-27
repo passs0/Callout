@@ -22,7 +22,7 @@
 
 ## What it does
 
-- **Quick action pill:** Shows `Copy`, `Look Up`, `Translate`, `Find`, and `>` on text selection.
+- **Quick action pill:** Clear Liquid Glass pill (`NSGlassEffectView.Style.clear`) showing `Copy`, `Look Up`, `Translate`, `Find`, `Siri`, and `>` that follows your selection as you scroll.
 - **Native app context menu:** Clicking `>` (or right-clicking the pill) dismisses the pill and opens the active app's real macOS right-click context menu directly on your selection.
 - **On-device translation:** Uses Apple's `Translation` framework with configurable target language in Settings.
 - **Shortcuts:** Trigger manually anytime with `⌥ Space` or `⌘⇧E`.
