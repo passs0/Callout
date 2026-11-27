@@ -89,13 +89,19 @@ struct ActionMenuView: View {
                 state.onDismiss?()
             }
 
+            pillDivider
+
             pillButton("Look Up") {
                 openLookUp()
             }
 
+            pillDivider
+
             pillButton("Translate") {
                 openTranslate()
             }
+
+            pillDivider
 
             pillButton("Find") {
                 let text = state.selectedText
@@ -103,27 +109,32 @@ struct ActionMenuView: View {
                 TextActionRunner.findInFrontmostApp(text)
             }
 
-            Divider()
-                .frame(height: 18)
-                .padding(.horizontal, 2)
-
             Button {
                 state.onShowNativeMenu?()
             } label: {
                 Image(systemName: "chevron.right")
-                    .frame(width: 26, height: 26)
+                    .font(.system(size: 12, weight: .semibold))
+                    .frame(width: 28, height: 28)
                     .contentShape(Circle())
             }
-            .buttonStyle(HoverHighlightButtonStyle(shape: AnyShape(Circle())))
+            .buttonStyle(HoverHighlightButtonStyle(shape: AnyShape(Circle()), restingFill: AnyShapeStyle(.quaternary)))
+            .padding(.leading, 4)
             .help("More Actions")
         }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 6)
+        .padding(.leading, 10)
+        .padding(.trailing, 6)
+        .padding(.vertical, 5)
         .glassEffect(.clear, in: .capsule)
         .glassEffectID("menuSurface", in: glassNamespace)
         .onSecondaryClick {
             state.onShowNativeMenu?()
         }
+    }
+
+    private var pillDivider: some View {
+        Divider()
+            .frame(height: 16)
+            .opacity(0.45)
     }
 
     private func pillButton(_ title: String, action: @escaping () -> Void) -> some View {
@@ -367,6 +378,7 @@ struct ActionMenuView: View {
 
 struct HoverHighlightButtonStyle: ButtonStyle {
     var shape: AnyShape
+    var restingFill: AnyShapeStyle? = nil
     @State private var isHovered = false
 
     func makeBody(configuration: Configuration) -> some View {
@@ -378,6 +390,8 @@ struct HoverHighlightButtonStyle: ButtonStyle {
                     shape.fill(Color.accentColor.opacity(0.85))
                 } else if isHovered {
                     shape.fill(Color.accentColor)
+                } else if let restingFill {
+                    shape.fill(restingFill)
                 }
             }
             .overlay {
