@@ -5,12 +5,12 @@
 <h1 align="center">Selection</h1>
 
 <p align="center">
-  A macOS 26 floating text-selection bar and context menu that appears right where you select text.
+  A macOS floating text-selection bar and context menu that appears right where you select text.
 </p>
 
 <p align="center">
   <a href="https://github.com/passs0/Selection/releases/latest"><img src="https://img.shields.io/github/v/release/passs0/Selection?label=Latest%20Release&color=007AFF" alt="Latest Release" /></a>
-  <img src="https://img.shields.io/badge/macOS-26.0%2B%20%7C%20Apple%20Silicon-black?logo=apple" alt="macOS 26.0+" />
+  <img src="https://img.shields.io/badge/macOS-15.0%2B%20%7C%20Apple%20Silicon-black?logo=apple" alt="macOS 15.0+" />
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="MIT License" /></a>
 </p>
 
@@ -22,14 +22,14 @@
 
 ## What it does
 
-- **Quick action pill:** Clear Liquid Glass pill (`NSGlassEffectView.Style.clear`) showing `Copy`, `Look Up`, `Translate`, `Find`, `Siri`, and `>` that follows your selection as you scroll.
+- **Quick action pill:** Uses native Liquid Glass (`NSGlassEffectView.Style.clear`) on macOS 26+ with automatic `NSVisualEffectView` popover vibrancy fallback on macOS 15, showing `Copy`, `Look Up`, `Translate`, `Find`, `Siri`, and `>` while following your selection as you scroll.
 - **Native app context menu:** Clicking `>` (or right-clicking the pill) dismisses the pill and opens the active app's real macOS right-click context menu directly on your selection.
 - **On-device translation:** Uses Apple's `Translation` framework with configurable target language in Settings.
 - **Shortcuts:** Trigger manually anytime with `⌥ Space` or `⌘⇧E`.
 
 ## Install
 
-Download **`Selection-1.2.0.dmg`** from [Releases](https://github.com/passs0/Selection/releases/latest) and drag `Selection.app` to `/Applications`.
+Download **`Selection-1.2.1.dmg`** from [Releases](https://github.com/passs0/Selection/releases/latest) and drag `Selection.app` to `/Applications`.
 
 Grant **Accessibility** permission in **System Settings → Privacy & Security → Accessibility** so Selection can read selected text across apps.
 

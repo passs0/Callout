@@ -137,7 +137,7 @@ struct ActionMenuView: View {
         .padding(.leading, 10)
         .padding(.trailing, 6)
         .padding(.vertical, 5)
-        .background(AppleGlassBackground(style: .clear, isCapsule: true))
+        .background(AdaptiveGlassBackground(isClear: true, isCapsule: true))
         .onSecondaryClick {
             state.onShowNativeMenu?()
         }
@@ -214,8 +214,7 @@ struct ActionMenuView: View {
         }
         .padding(14)
         .frame(width: 300)
-        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
-        .glassEffectID("menuSurface", in: glassNamespace)
+        .background(AdaptiveGlassBackground(isClear: false, cornerRadius: 22, isCapsule: false))
     }
 
     // MARK: - Inline Translate Card
@@ -317,8 +316,7 @@ struct ActionMenuView: View {
         }
         .padding(14)
         .frame(width: 300)
-        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
-        .glassEffectID("menuSurface", in: glassNamespace)
+        .background(AdaptiveGlassBackground(isClear: false, cornerRadius: 22, isCapsule: false))
     }
 
     // MARK: - Helpers
@@ -388,21 +386,36 @@ struct ActionMenuView: View {
     }
 }
 
-struct AppleGlassBackground: NSViewRepresentable {
-    var style: NSGlassEffectView.Style = .clear
+struct AdaptiveGlassBackground: View {
+    var isClear: Bool = true
     var cornerRadius: CGFloat = 22
     var isCapsule: Bool = false
 
+    var body: some View {
+        if #available(macOS 26.0, *) {
+            LiquidGlassNSView(isClear: isClear, cornerRadius: cornerRadius, isCapsule: isCapsule)
+        } else {
+            VibrancyNSView(cornerRadius: cornerRadius, isCapsule: isCapsule)
+        }
+    }
+}
+
+@available(macOS 26.0, *)
+private struct LiquidGlassNSView: NSViewRepresentable {
+    var isClear: Bool
+    var cornerRadius: CGFloat
+    var isCapsule: Bool
+
     func makeNSView(context: Context) -> GlassContainerNSView {
         let view = GlassContainerNSView()
-        view.glassView.style = style
+        view.glassView.style = isClear ? .clear : .regular
         view.isCapsule = isCapsule
         view.fixedCornerRadius = cornerRadius
         return view
     }
 
     func updateNSView(_ nsView: GlassContainerNSView, context: Context) {
-        nsView.glassView.style = style
+        nsView.glassView.style = isClear ? .clear : .regular
         nsView.isCapsule = isCapsule
         nsView.fixedCornerRadius = cornerRadius
         nsView.needsLayout = true
@@ -427,6 +440,53 @@ struct AppleGlassBackground: NSViewRepresentable {
             super.layout()
             glassView.frame = bounds
             glassView.cornerRadius = isCapsule ? bounds.height / 2 : fixedCornerRadius
+        }
+    }
+}
+
+private struct VibrancyNSView: NSViewRepresentable {
+    var cornerRadius: CGFloat
+    var isCapsule: Bool
+
+    func makeNSView(context: Context) -> VibrancyContainerNSView {
+        let view = VibrancyContainerNSView()
+        view.isCapsule = isCapsule
+        view.fixedCornerRadius = cornerRadius
+        return view
+    }
+
+    func updateNSView(_ nsView: VibrancyContainerNSView, context: Context) {
+        nsView.isCapsule = isCapsule
+        nsView.fixedCornerRadius = cornerRadius
+        nsView.needsLayout = true
+    }
+
+    final class VibrancyContainerNSView: NSView {
+        let effectView = NSVisualEffectView()
+        var isCapsule = false
+        var fixedCornerRadius: CGFloat = 22
+
+        override init(frame frameRect: NSRect) {
+            super.init(frame: frameRect)
+            effectView.material = .popover
+            effectView.blendingMode = .behindWindow
+            effectView.state = .active
+            effectView.wantsLayer = true
+            effectView.layer?.masksToBounds = true
+            effectView.autoresizingMask = [.width, .height]
+            addSubview(effectView)
+        }
+
+        required init?(coder: NSCoder) {
+            fatalError("init(coder:) has not been implemented")
+        }
+
+        override func layout() {
+            super.layout()
+            effectView.frame = bounds
+            let radius = isCapsule ? bounds.height / 2 : fixedCornerRadius
+            effectView.layer?.cornerRadius = radius
+            effectView.layer?.cornerCurve = .continuous
         }
     }
 }

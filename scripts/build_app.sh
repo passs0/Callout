@@ -33,7 +33,7 @@ if [ -d "$ICON_SRC" ]; then
             --development-region en \
             --target-device mac \
             --platform macosx \
-            --minimum-deployment-target 26.0 \
+            --minimum-deployment-target 15.0 \
             --output-partial-info-plist "$ROOT_DIR/build/assetcatalog_generated_info.plist"
     elif [ -x "$ICTOOL" ]; then
         echo "Rendering static AppIcon.icns from AppIcon.icon (Xcode not installed)..."
@@ -74,11 +74,11 @@ cat > "$CONTENTS_DIR/Info.plist" << 'EOF'
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>
-    <string>1.2.0</string>
+    <string>1.2.1</string>
     <key>CFBundleVersion</key>
-    <string>5</string>
+    <string>6</string>
     <key>LSMinimumSystemVersion</key>
-    <string>26.0</string>
+    <string>15.0</string>
     <key>LSUIElement</key>
     <true/>
     <key>NSHighResolutionCapable</key>

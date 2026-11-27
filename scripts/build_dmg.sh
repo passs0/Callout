@@ -8,7 +8,7 @@ cd "$ROOT_DIR"
 
 APP_DIR="$ROOT_DIR/build/Selection.app"
 DMG_STAGE="$ROOT_DIR/build/dmg_stage"
-DMG_PATH="$ROOT_DIR/build/Selection-1.2.0.dmg"
+DMG_PATH="$ROOT_DIR/build/Selection-1.2.1.dmg"
 
 rm -rf "$DMG_STAGE" "$DMG_PATH"
 mkdir -p "$DMG_STAGE"
