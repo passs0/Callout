@@ -4,10 +4,10 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT_DIR"
 
-echo "Building Selection (release, dead-stripped)..."
-swift build -c release -Xlinker -dead_strip
+echo "Building Selection (release, size-optimized, dead-stripped)..."
+swift build -c release -Xswiftc -Osize -Xlinker -dead_strip
 
-BIN_PATH="$(swift build -c release -Xlinker -dead_strip --show-bin-path)/Selection"
+BIN_PATH="$(swift build -c release -Xswiftc -Osize -Xlinker -dead_strip --show-bin-path)/Selection"
 APP_DIR="$ROOT_DIR/build/Selection.app"
 CONTENTS_DIR="$APP_DIR/Contents"
 MACOS_DIR="$CONTENTS_DIR/MacOS"
@@ -74,9 +74,9 @@ cat > "$CONTENTS_DIR/Info.plist" << 'EOF'
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>
-    <string>1.3.0</string>
+    <string>1.3.1</string>
     <key>CFBundleVersion</key>
-    <string>7</string>
+    <string>1.3.1</string>
     <key>LSMinimumSystemVersion</key>
     <string>15.0</string>
     <key>LSUIElement</key>
